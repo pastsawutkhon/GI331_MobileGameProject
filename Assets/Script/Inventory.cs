@@ -5,7 +5,7 @@ using System;
 
 public class Inventory : MonoBehaviour
 {
-    public int slotCount = 6;
+    public int slotCount = 5;
     public List<InventorySlot> slots = new List<InventorySlot>();
 
     public Dictionary<string, int> inventory =
