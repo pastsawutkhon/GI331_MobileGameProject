@@ -69,6 +69,17 @@
                     "action": "TouchPosition",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "add6e951-7e89-4d76-a2a9-da14981f399a",
+                    "path": "<Mouse>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "TouchPosition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }
