@@ -15,6 +15,9 @@ namespace Solution
         [Header("globalVolume slot Components")]
         [SerializeField] private Volume globalVolume;
 
+        [Header("Night Vision Secret Marks")]
+        [SerializeField] private GameObject nightVisionMarks;
+
         [Header("Camera Status")]
         [SerializeField] private bool isCameraActive = false;
 
@@ -32,6 +35,12 @@ namespace Solution
             if (slotImage != null)
             {
                 slotImage.enabled = true;
+            }
+
+            // ซ่อนร่องรอยไว้ตั้งแต่เริ่มเกม
+            if (nightVisionMarks != null)
+            {
+                nightVisionMarks.SetActive(false);
             }
         }
 
@@ -67,6 +76,12 @@ namespace Solution
                 globalVolume.gameObject.SetActive(isCameraActive);
             }
 
+            // 2. สั่งเปิด-ปิด รอยสัญลักษณ์ลับ 
+            if (nightVisionMarks != null)
+            {
+                nightVisionMarks.SetActive(isCameraActive);
+            }
+
             // 2. แจ้งเตือน Event ไปยังระบบอื่น (ถ้ามี)
             OnCameraToggled?.Invoke(isCameraActive);
         }
@@ -80,6 +95,11 @@ namespace Solution
                 if (globalVolume != null)
                 {
                     globalVolume.gameObject.SetActive(false);
+                }
+
+                if (nightVisionMarks != null)
+                {
+                    nightVisionMarks.SetActive(false);
                 }
 
                 OnCameraToggled?.Invoke(false);
