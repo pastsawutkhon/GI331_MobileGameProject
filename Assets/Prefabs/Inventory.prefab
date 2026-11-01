@@ -159,7 +159,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4306945069906338609}
-  - component: {fileID: 8921845345492041594}
   m_Layer: 0
   m_Name: PressAndDrag
   m_TagString: Untagged
@@ -182,20 +181,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 8324412684342117589}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8921845345492041594
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4827576227164113347}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a5b838679a74371409e2ac8b14bcb7b1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Solution.PressAndDrag
-  inputActions: {fileID: -944628639613478452, guid: 230d16a86e393a04191ba5705d092c79, type: 3}
-  inventoryUI: {fileID: 8336521533531957329}
 --- !u!1 &5651907261635937250
 GameObject:
   m_ObjectHideFlags: 0
