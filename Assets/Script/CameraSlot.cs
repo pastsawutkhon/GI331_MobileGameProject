@@ -70,19 +70,19 @@ namespace Solution
             isCameraActive = !isCameraActive;
             Debug.Log($"Camera State: {(isCameraActive ? "Active (ON)" : "Inactive (OFF)")}");
 
-            // 1. สั่งเปิด-ปิด GameObject ของ Global Volume โดยตรง
+            //สั่งเปิด-ปิด GameObject ของ Global Volume โดยตรง
             if (globalVolume != null)
             {
                 globalVolume.gameObject.SetActive(isCameraActive);
             }
 
-            // 2. สั่งเปิด-ปิด รอยสัญลักษณ์ลับ 
+            //สั่งเปิด-ปิด รอยสัญลักษณ์ลับ 
             if (nightVisionMarks != null)
             {
                 nightVisionMarks.SetActive(isCameraActive);
             }
 
-            // 2. แจ้งเตือน Event ไปยังระบบอื่น (ถ้ามี)
+            //แจ้งเตือน Event ไปยังระบบอื่น (ถ้ามี)
             OnCameraToggled?.Invoke(isCameraActive);
         }
 
