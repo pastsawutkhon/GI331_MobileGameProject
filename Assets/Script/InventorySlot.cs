@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Solution
 {
@@ -11,6 +12,8 @@ namespace Solution
         public string itemName = "";
         public Sprite icon;
         public int amount = 0;
+
+        public Image IconImage { get; internal set; }
 
         public bool IsEmpty()
         {

@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 3
   tags:
   - DropTarget
+  - DropTarget2
   layers:
   - Default
   - TransparentFX
