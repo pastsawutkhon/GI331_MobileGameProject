@@ -1,12 +1,18 @@
 using Solution;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
+using System.Collections;
 
 public class Document : PressAndDragBase
 {
     [Header("Envelope Settings")]
     [SerializeField] private GameObject paperObject; 
-    [SerializeField] private float slideOffset = 200f; 
+    [SerializeField] private float slideOffset = 200f;
+
+
+    [Header("Horror Events")]
+    public UnityEvent OnDocumentClosed;
 
     private bool isOpen = false;
     private Vector2 originalPosition;
@@ -60,8 +66,14 @@ public class Document : PressAndDragBase
             paperObject.SetActive(false);
 
             Debug.Log($"[{gameObject.name}] เก็บกระดาษเอกสาร");
+
+            
+
+            OnDocumentClosed?.Invoke();
         }
     }
+
+   
 
     public void CloseDocument()
     {
@@ -69,6 +81,7 @@ public class Document : PressAndDragBase
         {
             isOpen = false;
             ToggleEnvelopeAnimation(false);
+
         }
     }
 }
