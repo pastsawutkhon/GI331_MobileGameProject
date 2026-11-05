@@ -14,6 +14,7 @@ namespace Solution
 
         public bool IsCompleted { get; private set; }
         public bool IsBusy { get; private set; }
+        public event System.Action Opened;
 
         private GameObject coverRoot;
         private Image cover;
@@ -95,6 +96,7 @@ namespace Solution
             Destroy(coverRoot);
             coverRoot = null;
             IsBusy = false;
+            Opened?.Invoke();
         }
 
         private void CreateCover()
