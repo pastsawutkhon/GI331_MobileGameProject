@@ -51,7 +51,6 @@ namespace Solution
             return image != null && image.enabled;
         }
 
-        // --- ส่วนที่เพิ่ม: ตรวจสอบการนำไอเทมไปวางใส่เป้าหมาย ---
         protected override bool OnDrop(GameObject draggedObject, Vector2 screenPosition)
         {
             if (inventoryUI == null || inventory == null) return false;
@@ -71,22 +70,28 @@ namespace Solution
 
             string draggedItemName = inventoryUI.inventory.slots[slotIndex].itemName;
 
-            // เช็คว่าวางลงบน UI ที่รับไอเทมหรือไม่
-            IItemReceiver uiReceiver = PickUI<IItemReceiver>(screenPosition);
-            if (uiReceiver != null && uiReceiver.CanReceiveItem(draggedItemName))
+            // 1. ตรวจสอบ UI (ดึงเป็น Component ก่อน แล้วแปลงเป็น IItemReceiver)
+            Component hitUI = PickUI<Component>(screenPosition);
+            if (hitUI != null && hitUI.TryGetComponent<IItemReceiver>(out var uiReceiver))
             {
-                uiReceiver.OnReceiveItem(draggedItemName);
-                inventoryUI.UseSlot(slotIndex); // ลดจำนวน/ลบไอเทมออกจากกระเป๋า
-                return true;
+                if (uiReceiver.CanReceiveItem(draggedItemName))
+                {
+                    uiReceiver.OnReceiveItem(draggedItemName);
+                    inventoryUI.UseSlot(slotIndex);
+                    return true;
+                }
             }
 
-            // เช็คว่าวางลงบน 2D Collider ในฉากที่รับไอเทมหรือไม่
-            IItemReceiver worldReceiver = PickWorld<IItemReceiver>(screenPosition);
-            if (worldReceiver != null && worldReceiver.CanReceiveItem(draggedItemName))
+            // 2. ตรวจสอบ 2D Collider ในฉาก (ดึงเป็น Component ก่อน แล้วแปลงเป็น IItemReceiver)
+            Component hitWorld = PickWorld<Component>(screenPosition);
+            if (hitWorld != null && hitWorld.TryGetComponent<IItemReceiver>(out var worldReceiver))
             {
-                worldReceiver.OnReceiveItem(draggedItemName);
-                inventoryUI.UseSlot(slotIndex);
-                return true;
+                if (worldReceiver.CanReceiveItem(draggedItemName))
+                {
+                    worldReceiver.OnReceiveItem(draggedItemName);
+                    inventoryUI.UseSlot(slotIndex);
+                    return true;
+                }
             }
 
             return false;
