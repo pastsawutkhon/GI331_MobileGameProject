@@ -509,7 +509,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1495827139205282559, guid: b7354d5ac79f04a4382f47217f3b6b3c, type: 3}
       propertyPath: itemIcon
-      value:
+      value: 
       objectReference: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
     - target: {fileID: 1495827139205282559, guid: b7354d5ac79f04a4382f47217f3b6b3c, type: 3}
       propertyPath: inventory
@@ -2183,7 +2183,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6538947450925316355, guid: 70e0bd5500798c64e8c6841e0da26632, type: 3}
       propertyPath: itemIcon
-      value:
+      value: 
       objectReference: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
     - target: {fileID: 6538947450925316355, guid: 70e0bd5500798c64e8c6841e0da26632, type: 3}
       propertyPath: inventory
@@ -2660,6 +2660,6 @@ SceneRoots:
   m_Roots:
   - {fileID: 389652203}
   - {fileID: 1376716222}
-  - {fileID: 1469103129}
   - {fileID: 1081803324}
+  - {fileID: 1469103129}
   - {fileID: 174941856}
