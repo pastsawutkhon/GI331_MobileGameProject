@@ -1,4 +1,3 @@
-
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -16,28 +15,17 @@ namespace Solution
 
             if (slotIndex >= 0)
             {
-                // ช่องว่าง: จบการกดตรงนี้ ไม่ไปเก็บของด้านหลัง
-                // ช่องมีของ: ให้คลาสแม่ตรวจต่อว่าสามารถลากได้ไหม
-                return inventoryUI == null ||
-                       !inventoryUI.HasItemInSlot(slotIndex);
+                return inventoryUI == null || !inventoryUI.HasItemInSlot(slotIndex);
             }
 
-            // ตรวจ UI ก่อนตามลำดับเดิม
-            PickupItem uiPickup = PickUI<PickupItem>(
-                screenPosition
-            );
-
+            PickupItem uiPickup = PickUI<PickupItem>(screenPosition);
             if (uiPickup != null)
             {
                 uiPickup.TryPickup();
                 return true;
             }
 
-            // ถ้าไม่โดน UI ที่เก็บของได้ ให้ตรวจฉาก
-            PickupItem worldPickup = PickWorld<PickupItem>(
-                screenPosition
-            );
-
+            PickupItem worldPickup = PickWorld<PickupItem>(screenPosition);
             if (worldPickup != null)
             {
                 worldPickup.TryPickup();
@@ -47,62 +35,85 @@ namespace Solution
             return false;
         }
 
-        protected override bool TryGetDragTarget(
-            Vector2 screenPosition,
-            out Image image)
+        protected override bool TryGetDragTarget(Vector2 screenPosition, out Image image)
         {
             image = null;
 
-            if (inventoryUI == null ||
-                inventoryUI.slotImages == null)
-            {
+            if (inventoryUI == null || inventoryUI.slotImages == null)
                 return false;
-            }
 
             int slotIndex = PickInventorySlot(screenPosition);
 
-            if (slotIndex < 0 ||
-                !inventoryUI.HasItemInSlot(slotIndex) ||
-                slotIndex >= inventoryUI.slotImages.Length)
-            {
+            if (slotIndex < 0 || !inventoryUI.HasItemInSlot(slotIndex) || slotIndex >= inventoryUI.slotImages.Length)
                 return false;
-            }
 
             image = inventoryUI.slotImages[slotIndex];
-
             return image != null && image.enabled;
         }
 
-        // Inventory ใช้ Image เป็นภาพไอคอนประจำช่อง
-        // จึงต้องคืนภาพกลับช่องเดิม ไม่ว่าจะปล่อยสำเร็จหรือไม่
-        protected override bool ShouldRestorePosition(
-            GameObject target,
-            bool dropSucceeded)
+        // --- ส่วนที่เพิ่ม: ตรวจสอบการนำไอเทมไปวางใส่เป้าหมาย ---
+        protected override bool OnDrop(GameObject draggedObject, Vector2 screenPosition)
+        {
+            if (inventoryUI == null || inventory == null) return false;
+
+            // หา Index ของช่องที่ถูกลาก
+            int slotIndex = -1;
+            for (int i = 0; i < inventoryUI.slotImages.Length; i++)
+            {
+                if (inventoryUI.slotImages[i] != null && inventoryUI.slotImages[i].gameObject == draggedObject)
+                {
+                    slotIndex = i;
+                    break;
+                }
+            }
+
+            if (slotIndex < 0 || !inventoryUI.HasItemInSlot(slotIndex)) return false;
+
+            string draggedItemName = inventoryUI.inventory.slots[slotIndex].itemName;
+
+            // เช็คว่าวางลงบน UI ที่รับไอเทมหรือไม่
+            IItemReceiver uiReceiver = PickUI<IItemReceiver>(screenPosition);
+            if (uiReceiver != null && uiReceiver.CanReceiveItem(draggedItemName))
+            {
+                uiReceiver.OnReceiveItem(draggedItemName);
+                inventoryUI.UseSlot(slotIndex); // ลดจำนวน/ลบไอเทมออกจากกระเป๋า
+                return true;
+            }
+
+            // เช็คว่าวางลงบน 2D Collider ในฉากที่รับไอเทมหรือไม่
+            IItemReceiver worldReceiver = PickWorld<IItemReceiver>(screenPosition);
+            if (worldReceiver != null && worldReceiver.CanReceiveItem(draggedItemName))
+            {
+                worldReceiver.OnReceiveItem(draggedItemName);
+                inventoryUI.UseSlot(slotIndex);
+                return true;
+            }
+
+            return false;
+        }
+
+        protected override bool ShouldRestorePosition(GameObject target, bool dropSucceeded)
         {
             return true;
         }
 
         private int PickInventorySlot(Vector2 screenPosition)
         {
-            if (inventoryUI == null ||
-                EventSystem.current == null)
-            {
+            if (inventoryUI == null || EventSystem.current == null)
                 return -1;
-            }
 
             RaycastUI(screenPosition);
 
             foreach (RaycastResult hit in uiHits)
             {
-                int index = inventoryUI.GetSlotIndex(
-                    hit.gameObject
-                );
-
+                int index = inventoryUI.GetSlotIndex(hit.gameObject);
                 if (index >= 0)
                     return index;
             }
 
             return -1;
         }
+
+        private Inventory inventory => inventoryUI != null ? inventoryUI.inventory : null;
     }
 }
