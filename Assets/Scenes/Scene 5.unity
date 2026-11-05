@@ -508,6 +508,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 572234183}
     m_Modifications:
     - target: {fileID: 1495827139205282559, guid: b7354d5ac79f04a4382f47217f3b6b3c, type: 3}
+      propertyPath: itemIcon
+      value:
+      objectReference: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+    - target: {fileID: 1495827139205282559, guid: b7354d5ac79f04a4382f47217f3b6b3c, type: 3}
       propertyPath: inventory
       value: 
       objectReference: {fileID: 775277162}
@@ -2177,6 +2181,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SDCard_Item
       objectReference: {fileID: 0}
+    - target: {fileID: 6538947450925316355, guid: 70e0bd5500798c64e8c6841e0da26632, type: 3}
+      propertyPath: itemIcon
+      value:
+      objectReference: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
     - target: {fileID: 6538947450925316355, guid: 70e0bd5500798c64e8c6841e0da26632, type: 3}
       propertyPath: inventory
       value: 

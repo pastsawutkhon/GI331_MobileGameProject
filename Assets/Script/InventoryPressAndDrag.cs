@@ -53,69 +53,44 @@ namespace Solution
 
         protected override bool OnDrop(GameObject draggedObject, Vector2 screenPosition)
         {
-            if (inventoryUI == null || inventory == null) return false;
-
-            // หา Index ของช่องที่ถูกลาก
-            int slotIndex = -1;
-            for (int i = 0; i < inventoryUI.slotImages.Length; i++)
-            {
-                if (inventoryUI.slotImages[i] != null && inventoryUI.slotImages[i].gameObject == draggedObject)
-                {
-                    slotIndex = i;
-                    break;
-                }
-            }
-
-            if (slotIndex < 0 || !inventoryUI.HasItemInSlot(slotIndex)) return false;
-
-            string draggedItemName = inventoryUI.inventory.slots[slotIndex].itemName;
-
-            // 1. ตรวจสอบ UI (ดึงเป็น Component ก่อน แล้วแปลงเป็น IItemReceiver)
-            Component hitUI = PickUI<Component>(screenPosition);
-            if (hitUI != null && hitUI.TryGetComponent<IItemReceiver>(out var uiReceiver))
-            {
-                if (uiReceiver.CanReceiveItem(draggedItemName))
-                {
-                    uiReceiver.OnReceiveItem(draggedItemName);
-                    inventoryUI.UseSlot(slotIndex);
-                    return true;
-                }
-            }
-
-            // 2. ตรวจสอบ 2D Collider ในฉาก (ดึงเป็น Component ก่อน แล้วแปลงเป็น IItemReceiver)
-            Component hitWorld = PickWorld<Component>(screenPosition);
-            if (hitWorld != null && hitWorld.TryGetComponent<IItemReceiver>(out var worldReceiver))
-            {
-                if (worldReceiver.CanReceiveItem(draggedItemName))
-                {
-                    worldReceiver.OnReceiveItem(draggedItemName);
-                    inventoryUI.UseSlot(slotIndex);
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        protected override bool ShouldRestorePosition(GameObject target, bool dropSucceeded)
-        {
-            return true;
-        }
-
-        protected override bool OnDrop(GameObject draggedObject, Vector2 screenPosition)
-        {
             if (inventoryUI == null || inventoryUI.inventory == null)
                 return false;
             int index = inventoryUI.GetSlotIndex(draggedObject);
             if (!inventoryUI.HasItemInSlot(index))
                 return false;
+
+            string itemName = inventoryUI.inventory.slots[index].itemName;
             foreach (var hit in RaycastUI(screenPosition))
             {
+                // These targets own consumption (for example the gate-cut sequence).
                 var target = hit.gameObject.GetComponentInParent<InventoryDropTarget>();
                 if (target != null)
                     return target.TryUse(inventoryUI, index);
+
+                var receiver = hit.gameObject.GetComponentInParent<IItemReceiver>();
+                if (receiver != null)
+                    return TryGiveItem(receiver, itemName, index);
             }
-            return false;
+
+            // Pick a real collider transform, then search its parents for a receiver.
+            var worldHit = PickWorld<Transform>(screenPosition);
+            var worldReceiver = worldHit != null
+                ? worldHit.GetComponentInParent<IItemReceiver>() : null;
+            return worldReceiver != null && TryGiveItem(worldReceiver, itemName, index);
+        }
+
+        private bool TryGiveItem(IItemReceiver receiver, string itemName, int index)
+        {
+            if (!receiver.CanReceiveItem(itemName))
+                return false;
+            receiver.OnReceiveItem(itemName);
+            inventoryUI.UseSlot(index);
+            return true;
+        }
+
+        protected override bool ShouldRestorePosition(GameObject target, bool dropSucceeded)
+        {
+            return true;
         }
 
         private int PickInventorySlot(Vector2 screenPosition)
@@ -135,6 +110,5 @@ namespace Solution
             return -1;
         }
 
-        private Inventory inventory => inventoryUI != null ? inventoryUI.inventory : null;
     }
 }
