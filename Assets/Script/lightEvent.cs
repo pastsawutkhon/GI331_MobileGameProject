@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class lightEvent : MonoBehaviour
+public class lightEvent : Document
 {
     [Header("Horror Events")]
     [SerializeField] private GameObject lightObject;
@@ -43,6 +43,7 @@ public class lightEvent : MonoBehaviour
         if (lightObject != null)
         {
             lightObject.SetActive(false);
+            ShowSceneSymbol();
         }
     }
 }

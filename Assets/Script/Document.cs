@@ -10,14 +10,29 @@ public class Document : PressAndDragBase
     [SerializeField] private GameObject paperObject; 
     [SerializeField] private float slideOffset = 200f;
 
+    [Header("Document UI")]
+    [Tooltip("UI ส่วนที่ต้องซ่อนตอนหยิบมาอ่าน เช่น รูปซอง, ไอคอน, ป้ายชื่อ")]
+    [SerializeField] private GameObject[] uiToHideWhenHeld;
+
+    [Header("Scene Symbol")]
+    [SerializeField] private Canvas sceneSymbol;
+
 
     [Header("Horror Events")]
     public UnityEvent OnDocumentClosed;
 
     private bool isOpen = false;
+    private bool isHeld = false;
     private Vector2 originalPosition;
     private bool hasSavedPosition = false;
 
+    public void ShowSceneSymbol()
+    {
+        if (sceneSymbol == null) return;
+
+        sceneSymbol.gameObject.SetActive(true); 
+        sceneSymbol.enabled = true;             
+    }
     protected override bool OnPressed(Vector2 screenPosition)
     {
         var hitGraphic = PickUI<Graphic>(screenPosition);
@@ -26,13 +41,20 @@ public class Document : PressAndDragBase
         {
             isOpen = !isOpen;
             ToggleEnvelopeAnimation(isOpen);
-
+            SetHeld(isOpen);   // เปิด = หยิบมาอ่าน -> ซ่อน UI
             return true;
         }
 
         return base.OnPressed(screenPosition);
     }
-
+    private void SetHeld(bool held)
+    {
+        isHeld = held;
+        foreach (var go in uiToHideWhenHeld)
+        {
+            if (go != null) go.SetActive(!held);
+        }
+    }
     private void ToggleEnvelopeAnimation(bool open)
     {
         if (paperObject == null) return;
@@ -81,7 +103,6 @@ public class Document : PressAndDragBase
         {
             isOpen = false;
             ToggleEnvelopeAnimation(false);
-
         }
     }
 }
