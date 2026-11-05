@@ -102,6 +102,22 @@ namespace Solution
             return true;
         }
 
+        protected override bool OnDrop(GameObject draggedObject, Vector2 screenPosition)
+        {
+            if (inventoryUI == null || inventoryUI.inventory == null)
+                return false;
+            int index = inventoryUI.GetSlotIndex(draggedObject);
+            if (!inventoryUI.HasItemInSlot(index))
+                return false;
+            foreach (var hit in RaycastUI(screenPosition))
+            {
+                var target = hit.gameObject.GetComponentInParent<InventoryDropTarget>();
+                if (target != null)
+                    return target.TryUse(inventoryUI, index);
+            }
+            return false;
+        }
+
         private int PickInventorySlot(Vector2 screenPosition)
         {
             if (inventoryUI == null || EventSystem.current == null)
