@@ -8,9 +8,14 @@ namespace Solution
     {
         [Header("Inventory")]
         [SerializeField] private InventoryUI inventoryUI;
+        private Vector2 pressPosition;
+        private float pressTime;
 
         protected override bool OnPressed(Vector2 screenPosition)
         {
+            if (ReturnableNote.IsInspecting) return true;
+            pressPosition = screenPosition;
+            pressTime = Time.unscaledTime;
             int slotIndex = PickInventorySlot(screenPosition);
 
             if (slotIndex >= 0)
@@ -91,6 +96,18 @@ namespace Solution
         protected override bool ShouldRestorePosition(GameObject target, bool dropSucceeded)
         {
             return true;
+        }
+
+        protected override void OnDragFinished(GameObject draggedObject, Vector2 screenPosition, bool dropSucceeded)
+        {
+            if (dropSucceeded || Vector2.Distance(pressPosition, screenPosition) > 16f
+                || Time.unscaledTime - pressTime > 0.5f) return;
+            int index = inventoryUI.GetSlotIndex(draggedObject);
+            if (inventoryUI.HasItemInSlot(index))
+            {
+                string item = inventoryUI.inventory.slots[index].itemName;
+                if (!ReturnableNote.TryInspect(item)) BinderInspection.TryInspect(item);
+            }
         }
 
         private int PickInventorySlot(Vector2 screenPosition)

@@ -13,6 +13,21 @@ public class Inventory : MonoBehaviour
 
     public event Action OnInventoryChanged;
 
+    public void RestoreSlots(IReadOnlyList<InventorySlot> savedSlots)
+    {
+        slots.Clear();
+        for (int i = 0; i < slotCount; i++)
+        {
+            var saved = savedSlots != null && i < savedSlots.Count ? savedSlots[i] : null;
+            slots.Add(saved == null ? new InventorySlot() : new InventorySlot
+            {
+                itemName = saved.itemName, icon = saved.icon, amount = saved.amount
+            });
+        }
+        UpdateDictionary();
+        OnInventoryChanged?.Invoke();
+    }
+
     private void Awake()
     {
         while (slots.Count < slotCount)

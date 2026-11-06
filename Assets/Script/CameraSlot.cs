@@ -20,6 +20,7 @@ namespace Solution
 
         public event Action<bool> OnCameraToggled;
         public bool IsCameraActive => isCameraActive;
+        public float NightVisionOpacity => fullWeight > 0f ? currentWeight / fullWeight : 0f;
 
         private Coroutine transition;
         private float fullWeight = 1f;
