@@ -54,6 +54,7 @@ public class Document : PressAndDragBase
         {
             if (go != null) go.SetActive(!held);
         }
+
     }
     private void ToggleEnvelopeAnimation(bool open)
     {

@@ -8,6 +8,9 @@ public class lightEvent : Document
     [SerializeField] private AudioSource doorAudioSource;
     [SerializeField] private AudioSource lightAudioSource;
 
+    [Header("After Light Returns")]
+    [SerializeField] private GameObject ui;
+
     public void OnDocumentClosed()
     {
         StartCoroutine(HorrorSequence());
@@ -44,6 +47,7 @@ public class lightEvent : Document
         {
             lightObject.SetActive(false);
             ShowSceneSymbol();
+            ui.SetActive(true);
         }
     }
 }
