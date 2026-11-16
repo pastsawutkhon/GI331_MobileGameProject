@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using Solution;
 
 public class lightEvent : Document
 {
@@ -10,6 +11,7 @@ public class lightEvent : Document
 
     [Header("After Light Returns")]
     [SerializeField] private GameObject ui;
+    [SerializeField] private Scene4PictureNavigation scene4Navigation;
 
     public void OnDocumentClosed()
     {
@@ -37,6 +39,11 @@ public class lightEvent : Document
         if (doorAudioSource != null)
         {
             doorAudioSource.Play();
+        }
+
+        if (scene4Navigation != null)
+        {
+            scene4Navigation.SwitchToMainBackground();
         }
 
         //รอต่ออีกประมาณ 2-3 วินาที

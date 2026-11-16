@@ -7,6 +7,7 @@ namespace Solution
     public class Scene4PictureNavigation : MonoBehaviour
     {
         [Header("Background & Views")]
+        [SerializeField] private Image background1;
         [SerializeField] private Image backgroundImage;
         [SerializeField] private Sprite mainView;
         [SerializeField] private Sprite leftView;
@@ -27,19 +28,7 @@ namespace Solution
         public bool InteractionLocked { get; private set; }
         public event System.Action<int> ViewChanged;
 
-        public void SetInteractionLocked(bool locked)
-        {
-            InteractionLocked = locked;
-            RefreshControls();
-        }
-        public void UpdateLeftView(Sprite newLeftSprite)
-        {
-            leftView = newLeftSprite;
-            if (CurrentView == -1 && backgroundImage != null)
-            {
-                backgroundImage.sprite = leftView;
-            }
-        }
+       
         private void OnEnable()
         {
             if (leftArrow != null) leftArrow.onClick.AddListener(LookLeft);
@@ -47,13 +36,20 @@ namespace Solution
 
             // เริ่มโหมดสำรวจและตั้งภาพหลักทันทีเมื่อเปิดฉาก
             CurrentView = 0;
-            IsExploring = true;
+            IsExploring = false;
             IsBusy = false;
 
+            if (background1 != null) background1.gameObject.SetActive(true);
             if (backgroundImage != null && mainView != null)
             {
-                backgroundImage.sprite = mainView;
-                backgroundImage.gameObject.name = "Pic 4 - Main";
+                backgroundImage.gameObject.SetActive(false);
+                if (mainView != null)
+                {
+                    backgroundImage.sprite = mainView;
+                    backgroundImage.gameObject.name = "Pic 4 - Main";
+                }
+                //backgroundImage.sprite = mainView;
+                //backgroundImage.gameObject.name = "Pic 4 - Main";
             }
 
             if (fadeOverlay != null)
@@ -65,6 +61,47 @@ namespace Solution
             RefreshControls();
         }
 
+        public void SwitchToMainBackground()
+        {
+            if (IsBusy || IsExploring) return;
+            StartCoroutine(TransitionToMainBackground());
+        }
+
+        private IEnumerator TransitionToMainBackground()
+        {
+            IsBusy = true;
+            RefreshControls();
+
+            if (fadeOverlay != null)
+            {
+                fadeOverlay.gameObject.SetActive(true);
+                fadeOverlay.blocksRaycasts = true;
+                yield return Fade(0f, 1f);
+            }
+
+            // ปิด Background 1 และเปิด Pic 1 - Entrance ขึ้นมาแทน
+            if (background1 != null) background1.gameObject.SetActive(false);
+            if (backgroundImage != null)
+            {
+                backgroundImage.gameObject.SetActive(true);
+                if (mainView != null) backgroundImage.sprite = mainView;
+                backgroundImage.gameObject.name = "Pic 4 - Main";
+            }
+
+            CurrentView = 0;
+            IsExploring = true;
+            RefreshControls();
+
+            if (fadeOverlay != null)
+            {
+                yield return Fade(1f, 0f);
+                fadeOverlay.blocksRaycasts = false;
+            }
+
+            IsBusy = false;
+            RefreshControls();
+        }
+
         public void LookLeft()
         {
             if (IsExploring && !IsBusy && !InteractionLocked && CurrentView > -1 && leftView != null)
@@ -73,6 +110,7 @@ namespace Solution
 
         public void LookRight()
         {
+
             if (IsExploring && !IsBusy && !InteractionLocked && CurrentView < 1 && rightView != null)
                 BeginViewChange(CurrentView + 1);
         }
@@ -131,19 +169,35 @@ namespace Solution
             fadeOverlay.alpha = to;
         }
 
+        public void SetInteractionLocked(bool locked)
+        {
+            InteractionLocked = locked;
+            RefreshControls();
+        }
+        public void UpdateLeftView(Sprite newLeftSprite)
+        {
+            leftView = newLeftSprite;
+            if (CurrentView == -1 && backgroundImage != null)
+            {
+                backgroundImage.sprite = leftView;
+            }
+        }
+
         private void RefreshControls()
         {
             if (navigationUI != null) navigationUI.SetActive(IsExploring);
 
             if (leftArrow != null)
             {
-                leftArrow.gameObject.SetActive(CurrentView > -1);
+                leftArrow.gameObject.SetActive(IsExploring && CurrentView > -1);
+                //leftArrow.gameObject.SetActive(CurrentView > -1);
                 leftArrow.interactable = !IsBusy && !InteractionLocked;
             }
 
             if (rightArrow != null)
             {
-                rightArrow.gameObject.SetActive(CurrentView < 1);
+                rightArrow.gameObject.SetActive(IsExploring && CurrentView < 1);
+                //rightArrow.gameObject.SetActive(CurrentView < 1);
                 rightArrow.interactable = !IsBusy && !InteractionLocked;
             }
         }
