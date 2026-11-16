@@ -11,7 +11,7 @@ namespace Solution
 
         [Header("ปุ่มเปลี่ยนซีน")]
         [SerializeField] private Button exitSceneButton; // ลากปุ่มไปซีนถัดไปมาใส่
-        [SerializeField] private string destinationScene = "scene 4"; // พิมพ์ชื่อซีนถัดไป
+        [SerializeField] private string destinationScene = "scene 4";
 
         private bool isTransitioning = false;
 

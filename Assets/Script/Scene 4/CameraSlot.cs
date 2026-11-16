@@ -18,6 +18,8 @@ namespace Solution
         [Header("Lens Transition")]
         [SerializeField, Min(0.05f)] private float transitionDuration = 0.38f;
 
+        [SerializeField] private GhostEvent ghostEvent;
+
         public event Action<bool> OnCameraToggled;
         public bool IsCameraActive => isCameraActive;
         public float NightVisionOpacity => fullWeight > 0f ? currentWeight / fullWeight : 0f;
@@ -92,9 +94,22 @@ namespace Solution
 
         private void SetCameraActive(bool active)
         {
+            // นับเฉพาะตอนเปิดกล้อง
+            if (active)
+            {
+                GhostEvent ghostEvent = FindFirstObjectByType<GhostEvent>();
+
+                if (ghostEvent != null)
+                {
+                    ghostEvent.RegisterUse();
+                }
+            }
+
             isCameraActive = active;
+
             if (transition != null)
                 StopCoroutine(transition);
+
             if (isActiveAndEnabled)
             {
                 EnsureLens();
@@ -107,6 +122,7 @@ namespace Solution
                 SetMarks(active);
                 SetLens(active ? 1f : 0f);
             }
+
             OnCameraToggled?.Invoke(active);
         }
 

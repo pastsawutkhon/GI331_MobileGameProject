@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.UI;
 
 namespace Solution
@@ -15,6 +16,7 @@ namespace Solution
         [Header("Step 2: Makeup Brush")]
         [SerializeField] private string step2ItemName = "Brush";
         [SerializeField] private GameObject step2UIToShow;
+        [SerializeField] private AudioSource audioWhisper;
 
         [Header("Target Settings")]
         [SerializeField] private string requiredTargetTag = "DropTarget";
@@ -73,6 +75,8 @@ namespace Solution
                         {
                             if (step2UIToShow != null) step2UIToShow.SetActive(true);
                             currentStep = Step.Completed;
+
+                            audioWhisper.Play();
                         }
 
                         if (consumeItemOnDrop)
