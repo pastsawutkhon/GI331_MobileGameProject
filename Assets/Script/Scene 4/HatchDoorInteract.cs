@@ -50,7 +50,16 @@ namespace Solution
         [SerializeField] private GameObject undoButton;
         [SerializeField] private GameObject lookControls;
 
+        [Header("Night Vision Touch Hints")]
+        [SerializeField] private RectTransform documentFold;
+        [SerializeField] private Sprite fingerprintSprite;
+        [SerializeField] private Shader fingerprintShader;
+        private Canvas hintCanvas;
+        private Material hintInk;
+        private readonly Image[] hints = new Image[4];
+
         [Header("Board apparition")]
+        [SerializeField] private Sprite bloodHandprint;
         [SerializeField] private Sprite boardGhostSprite;
         [SerializeField] private AudioClip boardHandImpact;
         private Canvas scareCanvas;
@@ -68,6 +77,7 @@ namespace Solution
 
         private void LateUpdate()
         {
+            UpdateTouchHints();
             UpdateCandleNumbers();
             if (zoomView != ZoomView.Paper || !centerBackgroundImage || !paperCloseUp) return;
 
@@ -324,6 +334,8 @@ namespace Solution
 
         protected override void OnDestroy()
         {
+            if (hintCanvas) Destroy(hintCanvas.gameObject);
+            if (hintInk) Destroy(hintInk);
             if (numberCanvas) Destroy(numberCanvas.gameObject);
             if (flameSprite) Destroy(flameSprite);
             if (flameTexture) Destroy(flameTexture);
@@ -446,6 +458,63 @@ namespace Solution
             if (nextView == ZoomView.Room) sceneNavigation.SetInteractionLocked(false);
         }
 
+        private void UpdateTouchHints()
+        {
+            bool night = nightVisionCamera && nightVisionCamera.IsCameraActive &&
+                nightVisionCamera.NightVisionOpacity > 0f;
+            bool document = documentFold && documentFold.gameObject.activeInHierarchy;
+            bool room = !document && sceneNavigation && sceneNavigation.IsExploring &&
+                !sceneNavigation.InteractionLocked && !sceneNavigation.IsBusy && !fading &&
+                zoomView == ZoomView.Room && centerBackgroundImage && centerBackgroundImage.isActiveAndEnabled;
+            bool center = room && sceneNavigation.CurrentView == 0;
+            bool right = room && sceneNavigation.CurrentView == 1;
+            bool visible = night && (document || center || right) && fingerprintSprite && fingerprintShader;
+            if (!visible)
+            {
+                if (hintCanvas && hintCanvas.gameObject.activeSelf) hintCanvas.gameObject.SetActive(false);
+                return;
+            }
+            if (!hintCanvas)
+            {
+                var root = new GameObject("Night Vision Touch Hints", typeof(RectTransform), typeof(Canvas));
+                hintCanvas = root.GetComponent<Canvas>();
+                hintCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                hintCanvas.sortingOrder = -2;
+                hintInk = new Material(fingerprintShader);
+                string[] names = { "Document fold", "Symbol", "Candles", "Board" };
+                for (int i = 0; i < hints.Length; i++)
+                {
+                    var hint = new GameObject(names[i], typeof(RectTransform), typeof(Image));
+                    hint.transform.SetParent(root.transform, false);
+                    Image image = hints[i] = hint.GetComponent<Image>();
+                    image.sprite = fingerprintSprite;
+                    image.material = hintInk;
+                    image.preserveAspect = true;
+                    image.raycastTarget = false;
+                    image.rectTransform.anchorMin = image.rectTransform.anchorMax = Vector2.zero;
+                }
+            }
+            if (!hintCanvas.gameObject.activeSelf) hintCanvas.gameObject.SetActive(true);
+            PlaceHint(hints[0], documentFold, document);
+            PlaceHint(hints[1], symbolTouchZone, center);
+            PlaceHint(hints[2], candleTouchZone, center);
+            PlaceHint(hints[3], boardTouchZone, right);
+        }
+
+        private void PlaceHint(Image image, RectTransform target, bool visible)
+        {
+            image.enabled = visible && target && target.gameObject.activeInHierarchy;
+            if (!image.enabled) return;
+            Canvas root = target.GetComponentInParent<Canvas>().rootCanvas;
+            Camera camera = root.renderMode == RenderMode.ScreenSpaceOverlay ? null :
+                (root.worldCamera ? root.worldCamera : Cam);
+            Vector2 point = RectTransformUtility.WorldToScreenPoint(camera, target.TransformPoint(target.rect.center));
+            RectTransform canvasRect = (RectTransform)hintCanvas.transform;
+            image.rectTransform.anchoredPosition = point / hintCanvas.scaleFactor;
+            image.rectTransform.sizeDelta = Vector2.one * Mathf.Min(canvasRect.rect.width, canvasRect.rect.height) * .105f;
+            image.color = new Color(1f, .78f, .24f, nightVisionCamera.NightVisionOpacity);
+        }
+
         private IEnumerator BoardApparition()
         {
             boardGhostSeen = true;
@@ -457,6 +526,13 @@ namespace Solution
             AudioSource speaker = layer.GetComponent<AudioSource>();
             speaker.playOnAwake = false;
             speaker.spatialBlend = 0f;
+            var stain = new GameObject("Blood on glass", typeof(RectTransform), typeof(Image)).GetComponent<Image>();
+            stain.transform.SetParent(layer.transform, false);
+            stain.sprite = bloodHandprint;
+            stain.preserveAspect = true;
+            stain.raycastTarget = false;
+            stain.color = new Color(.85f, .055f, .045f, .96f);
+            stain.enabled = false;
             var hand = new GameObject("Hand", typeof(RectTransform), typeof(Image));
             hand.transform.SetParent(layer.transform, false);
             boardGhost = hand.GetComponent<Image>();
@@ -488,6 +564,16 @@ namespace Solution
                 yield return null;
             }
             rt.localScale = Vector3.one * 1.06f;
+            if (bloodHandprint)
+            {
+                // Keep the transfer on the glass as the hand slides away.
+                Rect fitted = rt.rect;
+                float handWidth = Mathf.Min(fitted.width, fitted.height * boardGhostSprite.rect.width / boardGhostSprite.rect.height) * 1.06f;
+                stain.rectTransform.position = rt.position;
+                stain.rectTransform.sizeDelta = new Vector2(handWidth * 1.32f, handWidth * .88f);
+                stain.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 16f);
+                stain.enabled = true;
+            }
             SetBoardLight(.73f);
             yield return new WaitForSecondsRealtime(.22f);
             SetBoardLight(.10f);
@@ -503,6 +589,14 @@ namespace Solution
                 rt.anchoredPosition = new Vector2(screen.width * .28f, -screen.height * 1.18f) * slide;
                 elapsed += Time.unscaledDeltaTime;
                 yield return null;
+            }
+            if (stain.enabled)
+            {
+                for (float time = 0f; time < .4f; time += Time.unscaledDeltaTime)
+                {
+                    stain.canvasRenderer.SetAlpha(1f - time / .4f);
+                    yield return null;
+                }
             }
             FinishBoardApparition();
         }
@@ -539,6 +633,7 @@ namespace Solution
         protected override void OnDisable()
         {
             base.OnDisable();
+            if (hintCanvas) hintCanvas.gameObject.SetActive(false);
             FinishBoardApparition();
             if (numberCanvas) numberCanvas.gameObject.SetActive(false);
             if (!fading && zoomView == ZoomView.Room) return;
