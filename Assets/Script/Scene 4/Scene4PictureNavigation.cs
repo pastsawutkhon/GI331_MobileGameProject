@@ -9,9 +9,9 @@ namespace Solution
         [Header("Background & Views")]
         [SerializeField] private Image background1;
         [SerializeField] private Image backgroundImage;
-        [SerializeField] private Sprite mainView;
-        [SerializeField] private Sprite leftView;
-        [SerializeField] private Sprite rightView;
+        [SerializeField] private Image mainView;
+        [SerializeField] private Image leftView;
+        [SerializeField] private Image rightView;
 
         [Header("Navigation UI")]
         [SerializeField] private GameObject navigationUI;
@@ -28,7 +28,17 @@ namespace Solution
         public bool InteractionLocked { get; private set; }
         public event System.Action<int> ViewChanged;
 
-       
+
+        private Sprite runtimeLeftSprite;
+        private bool hasRuntimeLeftSprite;
+
+        private Sprite GetViewSprite(int view)
+        {
+            if (view < 0 && hasRuntimeLeftSprite) return runtimeLeftSprite;
+            Image source = view < 0 ? leftView : view > 0 ? rightView : mainView;
+            return source != null ? source.sprite : null;
+        }
+
         private void OnEnable()
         {
             if (leftArrow != null) leftArrow.onClick.AddListener(LookLeft);
@@ -43,13 +53,8 @@ namespace Solution
             if (backgroundImage != null && mainView != null)
             {
                 backgroundImage.gameObject.SetActive(false);
-                if (mainView != null)
-                {
-                    backgroundImage.sprite = mainView;
-                    backgroundImage.gameObject.name = "Pic 4 - Main";
-                }
-                //backgroundImage.sprite = mainView;
-                //backgroundImage.gameObject.name = "Pic 4 - Main";
+                backgroundImage.sprite = mainView.sprite;
+                backgroundImage.gameObject.name = "Pic 4 - Main";
             }
 
             if (fadeOverlay != null)
@@ -84,7 +89,7 @@ namespace Solution
             if (backgroundImage != null)
             {
                 backgroundImage.gameObject.SetActive(true);
-                if (mainView != null) backgroundImage.sprite = mainView;
+                if (mainView != null) backgroundImage.sprite = mainView.sprite;
                 backgroundImage.gameObject.name = "Pic 4 - Main";
             }
 
@@ -104,14 +109,14 @@ namespace Solution
 
         public void LookLeft()
         {
-            if (IsExploring && !IsBusy && !InteractionLocked && CurrentView > -1 && leftView != null)
+            if (IsExploring && !IsBusy && !InteractionLocked && CurrentView > -1 && GetViewSprite(CurrentView - 1) != null)
                 BeginViewChange(CurrentView - 1);
         }
 
         public void LookRight()
         {
 
-            if (IsExploring && !IsBusy && !InteractionLocked && CurrentView < 1 && rightView != null)
+            if (IsExploring && !IsBusy && !InteractionLocked && CurrentView < 1 && GetViewSprite(CurrentView + 1) != null)
                 BeginViewChange(CurrentView + 1);
         }
 
@@ -135,7 +140,7 @@ namespace Solution
                 yield return Fade(0f, 1f);
 
             CurrentView = view;
-            backgroundImage.sprite = view < 0 ? leftView : view > 0 ? rightView : mainView;
+            backgroundImage.sprite = GetViewSprite(view);
             backgroundImage.gameObject.name = view < 0 ? "Pic 4 - Left"
                 : view > 0 ? "Pic 4 - Right" : "Pic 4 - Main";
 
@@ -176,10 +181,11 @@ namespace Solution
         }
         public void UpdateLeftView(Sprite newLeftSprite)
         {
-            leftView = newLeftSprite;
+            runtimeLeftSprite = newLeftSprite;
+            hasRuntimeLeftSprite = true;
             if (CurrentView == -1 && backgroundImage != null)
             {
-                backgroundImage.sprite = leftView;
+                backgroundImage.sprite = newLeftSprite;
             }
         }
 

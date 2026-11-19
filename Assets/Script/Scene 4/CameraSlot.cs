@@ -68,9 +68,22 @@ namespace Solution
 
         protected override bool OnPressed(Vector2 screenPosition)
         {
-            var hit = PickUI<Image>(screenPosition);
-            if (hit == null || hit.gameObject != gameObject)
-                return false;
+            if (!slotImage || !slotImage.canvas) return false;
+            if (isCameraActive)
+            {
+                // Clues may cover the inventory in a close-up or the destination scene.
+                Canvas root = slotImage.canvas.rootCanvas;
+                Camera camera = root.renderMode == RenderMode.ScreenSpaceOverlay ? null :
+                    (root.worldCamera ? root.worldCamera : Cam);
+                if (!RectTransformUtility.RectangleContainsScreenPoint(slotImage.rectTransform, screenPosition, camera))
+                    return false;
+            }
+            else
+            {
+                Image hit = PickUI<Image>(screenPosition);
+                if (!hit || (hit != slotImage && !hit.transform.IsChildOf(slotImage.transform)))
+                    return false;
+            }
             ToggleCamera();
             return true;
         }
