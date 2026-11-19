@@ -93,6 +93,7 @@ namespace Solution
 
         private void UpdateVisibility()
         {
+            effect.SetFloat("_NightVision", cameraSlot.NightVisionOpacity);
             float visible = closeUp && !awarded && cameraSlot.IsCameraActive ? cameraSlot.NightVisionOpacity : 0;
             if (visible >= .5f) discovered = true;
             if (Mathf.Approximately(visible, lastVisibility)) return;

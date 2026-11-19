@@ -353,7 +353,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -3519,9 +3519,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7730ce9b19205a4da11b075c334f1cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Solution.DoorLockReceiver
+  openingSound: {fileID: 8300000, guid: 862e79b6d0e6a6a4fa57e7ab45e901a3, type: 3}
   requiredKeyName: Key
-  operatingRoomGroup: {fileID: 748977222}
-  evidenceRoomGroup: {fileID: 452562391}
+  inventoryUI: {fileID: 775277161}
+  cameraSlot: {fileID: 232198097}
   background: {fileID: 1335542151}
   navigation: {fileID: 676118930}
 --- !u!1 &1980021001

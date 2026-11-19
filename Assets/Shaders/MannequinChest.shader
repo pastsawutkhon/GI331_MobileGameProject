@@ -23,6 +23,7 @@ Shader "UI/Scene5 Mannequin Chest"
             }
             sampler2D _MainTex, _Chest, _Released, _KeyTex;
             float4 _Organ0, _Organ1, _Organ2, _Move0, _Move1, _Move2, _KeyRect;
+            float _NightVision;
             float _DoorOpen, _Free, _Kick, _CloseUp, _KeyVisibility;
             float contour(float2 uv, float4 organ) {
                 float2 p=(uv-organ.xy)/organ.zw;
@@ -34,6 +35,11 @@ Shader "UI/Scene5 Mannequin Chest"
                 float mask=contour(src,organ);
                 if(mask<=0) return;
                 rgb=lerp(rgb,tex2D(_Chest,src).rgb*1.18,mask);
+            }
+            fixed4 roomColor(fixed4 color) {
+                float light=dot(color.rgb,float3(.299,.587,.114));
+                color.rgb=lerp(color.rgb,saturate((light*2.35+.035)*float3(.30,1,.36)),_NightVision);
+                return color;
             }
             fixed4 frag(Varyings i):SV_Target {
                 float2 uv=(i.uv-.5)*(1-.038*abs(_Kick))+.5+float2(.008,-.011)*_Kick;
@@ -62,7 +68,7 @@ Shader "UI/Scene5 Mannequin Chest"
                 if(_CloseUp<.5) {
                     float2 d=uv-float2(.33,.43);
                     p=float2(.15*d.x-.15*d.y,.016*d.x+.24*d.y)/.0384;
-                    if(any(p<0)||any(p>1)) return col*i.color;
+                    if(any(p<0)||any(p>1)) return roomColor(col*i.color);
                 }
                 float3 mask=float3(contour(p,_Organ0),contour(p,_Organ1),contour(p,_Organ2));
                 float3 moved=float3(_Move0.z,_Move1.z,_Move2.z);
@@ -80,7 +86,7 @@ Shader "UI/Scene5 Mannequin Chest"
                 drawPlaced(col.rgb,p,_Organ0,_Move0);
                 drawPlaced(col.rgb,p,_Organ1,_Move1);
                 drawPlaced(col.rgb,p,_Organ2,_Move2);
-                return col*i.color;
+                return roomColor(col*i.color);
             }
             ENDCG
         }
