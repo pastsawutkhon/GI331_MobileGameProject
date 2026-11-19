@@ -12,9 +12,16 @@ namespace Solution
         private List<InventorySlot> items;
         private bool nightVision;
         private string destination;
+        private System.Action onArrival;
+        public static bool InProgress { get; private set; }
 
-        public static void Begin(string sceneName, Inventory inventory, bool cameraActive)
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetTransition() => InProgress = false;
+
+        public static void Begin(string sceneName, Inventory inventory, bool cameraActive, System.Action onArrival = null)
         {
+            if (InProgress) return;
+            InProgress = true;
             var root = new GameObject("Scene Passage Fade", typeof(RectTransform),
                 typeof(Canvas), typeof(CanvasGroup), typeof(GraphicRaycaster), typeof(SceneEntranceFade));
             DontDestroyOnLoad(root);
@@ -33,6 +40,7 @@ namespace Solution
             rect.anchorMin = Vector2.zero;
             rect.anchorMax = Vector2.one;
             rect.offsetMin = rect.offsetMax = Vector2.zero;
+            runner.onArrival = onArrival;
             runner.destination = sceneName;
             runner.nightVision = cameraActive;
             if (inventory != null)
@@ -51,12 +59,19 @@ namespace Solution
             yield return SceneManager.LoadSceneAsync(destination, LoadSceneMode.Single);
             // Allow destination UI subscriptions to finish before restoring the inventory.
             yield return null;
-            var inventory = FindFirstObjectByType<Inventory>();
+            var inventoryUI = FindAnyObjectByType<InventoryUI>();
+            var inventory = inventoryUI ? inventoryUI.inventory : FindAnyObjectByType<Inventory>();
             if (inventory != null && items != null) inventory.RestoreSlots(items);
+            if (destination == "Scene 4")
+            {
+                foreach (var document in FindObjectsByType<Document>()) document.SyncCarriedDocument();
+            }
             var cameraSlot = FindFirstObjectByType<CameraSlot>();
             if (nightVision && cameraSlot != null && !cameraSlot.IsCameraActive)
                 cameraSlot.ToggleCamera();
+            onArrival?.Invoke();
             yield return Fade(1f, 0f);
+            InProgress = false;
             Destroy(gameObject);
         }
 

@@ -126,6 +126,27 @@ public class Document : PressAndDragBase
 
     // ---------- Collect ----------
 
+    internal const string CarriedDocumentName = "Document test";
+    private void Start()
+    {
+        if (itemName == CarriedDocumentName && inventoryUI && !SceneEntranceFade.InProgress)
+            SyncCarriedDocument();
+    }
+
+    internal void SyncCarriedDocument()
+    {
+        if (itemName != CarriedDocumentName || collected || !HasOwnItem()) return;
+        collected = true;
+        HideCollected(collectTarget);
+        foreach (var item in hideWhenCollected) HideCollected(item);
+    }
+
+    public void RestoreAfterHatchReturn()
+    {
+        firstCloseDone = true;
+        SyncCarriedDocument();
+    }
+
     private bool Collect()
     {
         if (inventoryUI == null || inventoryUI.inventory == null)
@@ -392,7 +413,7 @@ public class Document : PressAndDragBase
 
         if (zone != null)
         {
-            var canvas = zone.GetComponentInParent<Canvas>();
+            var canvas = zone.GetComponentInParent<Canvas>(true);
             Camera cam = (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay)
                 ? canvas.worldCamera : null;
 

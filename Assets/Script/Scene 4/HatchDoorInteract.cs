@@ -50,12 +50,20 @@ namespace Solution
         [SerializeField] private GameObject undoButton;
         [SerializeField] private GameObject lookControls;
 
+        [Header("Night Vision Touch Hints")]
+        [SerializeField] private RectTransform documentFold;
+        [SerializeField] private Sprite fingerprintSprite;
+        [SerializeField] private Shader fingerprintShader;
+        private Canvas hintCanvas;
+        private Material hintInk;
+        private readonly Image[] hints = new Image[4];
+
         [Header("Board apparition")]
         [SerializeField] private Sprite boardGhostSprite;
         [SerializeField] private AudioClip boardHandImpact;
         private Canvas scareCanvas;
         private bool readBoardPaper;
-        private bool boardGhostSeen;
+        private bool boardScareSeen;
         private Image boardGhost;
         private Color roomLightBeforeGhost;
 
@@ -68,6 +76,7 @@ namespace Solution
 
         private void LateUpdate()
         {
+            UpdateTouchHints();
             UpdateCandleNumbers();
             if (zoomView != ZoomView.Paper || !centerBackgroundImage || !paperCloseUp) return;
 
@@ -324,6 +333,8 @@ namespace Solution
 
         protected override void OnDestroy()
         {
+            if (hintCanvas) Destroy(hintCanvas.gameObject);
+            if (hintInk) Destroy(hintInk);
             if (numberCanvas) Destroy(numberCanvas.gameObject);
             if (flameSprite) Destroy(flameSprite);
             if (flameTexture) Destroy(flameTexture);
@@ -351,6 +362,7 @@ namespace Solution
                 !hatchTouchZone || !Contains(hatchTouchZone.rectTransform, screenPosition))
                 return false;
 
+            if (SceneEntranceFade.InProgress) return false;
             const string destination = "Scene 5";
             if (!Application.CanStreamedLevelBeLoaded(destination))
             {
@@ -358,9 +370,37 @@ namespace Solution
                 return false;
             }
             sceneNavigation.SetInteractionLocked(true);
-            SceneEntranceFade.Begin(destination, FindAnyObjectByType<Inventory>(),
-                nightVisionCamera && nightVisionCamera.IsCameraActive);
+            bool sawHand = boardScareSeen;
+            bool readPaper = readBoardPaper;
+            int[] savedDigits = (int[])digits.Clone();
+            SceneEntranceFade.Begin(destination, FindAnyObjectByType<InventoryUI>().inventory,
+                nightVisionCamera && nightVisionCamera.IsCameraActive, () =>
+                {
+                    var room = FindAnyObjectByType<WorldInteractionHandler>();
+                    if (room) room.AfterStairs = () => RestoreAtDoor(readPaper, sawHand, savedDigits);
+                });
             return true;
+        }
+
+        internal static void RestoreAtDoor(bool readPaper, bool sawHand, int[] savedDigits)
+        {
+            var hatch = FindAnyObjectByType<HatchDoorInteract>();
+            if (!hatch) return;
+            hatch.progress = hatch.lit.Length;
+            for (int i = 0; i < hatch.lit.Length; i++) hatch.lit[i] = true;
+            hatch.isOpened = true;
+            hatch.readBoardPaper = readPaper;
+            hatch.boardScareSeen = sawHand;
+            if (savedDigits != null) savedDigits.CopyTo(hatch.digits, 0);
+            hatch.cameraWasActive = hatch.nightVisionCamera && hatch.nightVisionCamera.IsCameraActive;
+            if (hatch.roomBackgroundImage) hatch.roomBackgroundImage.sprite = hatch.openHatchSprite;
+            hatch.ShowZoomControls(false);
+            hatch.sceneNavigation.ReturnToOpenDoor(hatch.openHatchSprite);
+            foreach (var document in FindObjectsByType<Document>())
+            {
+                if (document is lightEvent lights) lights.ShowSceneSymbol();
+                else document.RestoreAfterHatchReturn();
+            }
         }
 
         private bool HandleZoomPress(Vector2 screenPosition)
@@ -438,7 +478,7 @@ namespace Solution
             if (nextView == ZoomView.Paper) readBoardPaper = true;
             ShowZoomControls(nextView != ZoomView.Room);
             yield return FadeTo(0f);
-            if (returnedFromBoard && readBoardPaper && !boardGhostSeen && boardGhostSprite &&
+            if (returnedFromBoard && readBoardPaper && !boardScareSeen && boardGhostSprite &&
                 sceneNavigation.CurrentView == 1)
                 yield return BoardApparition();
             fadeOverlay.blocksRaycasts = false;
@@ -446,9 +486,66 @@ namespace Solution
             if (nextView == ZoomView.Room) sceneNavigation.SetInteractionLocked(false);
         }
 
+        private void UpdateTouchHints()
+        {
+            bool night = nightVisionCamera && nightVisionCamera.IsCameraActive &&
+                nightVisionCamera.NightVisionOpacity > 0f;
+            bool document = documentFold && documentFold.gameObject.activeInHierarchy;
+            bool room = !document && sceneNavigation && sceneNavigation.IsExploring &&
+                !sceneNavigation.InteractionLocked && !sceneNavigation.IsBusy && !fading &&
+                zoomView == ZoomView.Room && centerBackgroundImage && centerBackgroundImage.isActiveAndEnabled;
+            bool center = room && sceneNavigation.CurrentView == 0;
+            bool right = room && sceneNavigation.CurrentView == 1;
+            bool visible = night && (document || center || right) && fingerprintSprite && fingerprintShader;
+            if (!visible)
+            {
+                if (hintCanvas && hintCanvas.gameObject.activeSelf) hintCanvas.gameObject.SetActive(false);
+                return;
+            }
+            if (!hintCanvas)
+            {
+                var root = new GameObject("Night Vision Touch Hints", typeof(RectTransform), typeof(Canvas));
+                hintCanvas = root.GetComponent<Canvas>();
+                hintCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                hintCanvas.sortingOrder = -2;
+                hintInk = new Material(fingerprintShader);
+                string[] names = { "Document fold", "Symbol", "Candles", "Board" };
+                for (int i = 0; i < hints.Length; i++)
+                {
+                    var hint = new GameObject(names[i], typeof(RectTransform), typeof(Image));
+                    hint.transform.SetParent(root.transform, false);
+                    Image image = hints[i] = hint.GetComponent<Image>();
+                    image.sprite = fingerprintSprite;
+                    image.material = hintInk;
+                    image.preserveAspect = true;
+                    image.raycastTarget = false;
+                    image.rectTransform.anchorMin = image.rectTransform.anchorMax = Vector2.zero;
+                }
+            }
+            if (!hintCanvas.gameObject.activeSelf) hintCanvas.gameObject.SetActive(true);
+            PlaceHint(hints[0], documentFold, document);
+            PlaceHint(hints[1], symbolTouchZone, center);
+            PlaceHint(hints[2], candleTouchZone, center);
+            PlaceHint(hints[3], boardTouchZone, right);
+        }
+
+        private void PlaceHint(Image image, RectTransform target, bool visible)
+        {
+            image.enabled = visible && target && target.gameObject.activeInHierarchy;
+            if (!image.enabled) return;
+            Canvas root = target.GetComponentInParent<Canvas>().rootCanvas;
+            Camera camera = root.renderMode == RenderMode.ScreenSpaceOverlay ? null :
+                (root.worldCamera ? root.worldCamera : Cam);
+            Vector2 point = RectTransformUtility.WorldToScreenPoint(camera, target.TransformPoint(target.rect.center));
+            RectTransform canvasRect = (RectTransform)hintCanvas.transform;
+            image.rectTransform.anchoredPosition = point / hintCanvas.scaleFactor;
+            image.rectTransform.sizeDelta = Vector2.one * Mathf.Min(canvasRect.rect.width, canvasRect.rect.height) * .105f;
+            image.color = new Color(1f, .78f, .24f, nightVisionCamera.NightVisionOpacity);
+        }
+
         private IEnumerator BoardApparition()
         {
-            boardGhostSeen = true;
+            boardScareSeen = true;
             roomLightBeforeGhost = centerBackgroundImage.color;
             GameObject layer = new GameObject("Board Hand Scare", typeof(RectTransform), typeof(Canvas), typeof(AudioSource));
             scareCanvas = layer.GetComponent<Canvas>();
@@ -457,6 +554,10 @@ namespace Solution
             AudioSource speaker = layer.GetComponent<AudioSource>();
             speaker.playOnAwake = false;
             speaker.spatialBlend = 0f;
+            var scratches = new GameObject("Claw scratches on glass", typeof(RectTransform),
+                typeof(GlassClawScratches)).GetComponent<GlassClawScratches>();
+            scratches.transform.SetParent(layer.transform, false);
+            scratches.raycastTarget = false;
             var hand = new GameObject("Hand", typeof(RectTransform), typeof(Image));
             hand.transform.SetParent(layer.transform, false);
             boardGhost = hand.GetComponent<Image>();
@@ -488,6 +589,10 @@ namespace Solution
                 yield return null;
             }
             rt.localScale = Vector3.one * 1.06f;
+            float handWidth = Mathf.Min(rt.rect.width, rt.rect.height *
+                boardGhostSprite.rect.width / boardGhostSprite.rect.height) * 1.06f;
+            scratches.rectTransform.position = rt.position;
+            scratches.rectTransform.sizeDelta = new Vector2(handWidth, handWidth);
             SetBoardLight(.73f);
             yield return new WaitForSecondsRealtime(.22f);
             SetBoardLight(.10f);
@@ -499,9 +604,17 @@ namespace Solution
                 float t = Mathf.Clamp01(elapsed / 1.18f);
                 SetBoardLight(Mathf.Lerp(.10f, 1f, Mathf.SmoothStep(0f, 1f, t / .70f)));
                 float slide = Mathf.SmoothStep(0f, 1f, t);
+                scratches.Reveal(Mathf.Clamp01(slide * 2.8f));
                 Rect screen = ((RectTransform)layer.transform).rect;
                 rt.anchoredPosition = new Vector2(screen.width * .28f, -screen.height * 1.18f) * slide;
                 elapsed += Time.unscaledDeltaTime;
+                yield return null;
+            }
+            scratches.Reveal(1f);
+            yield return new WaitForSecondsRealtime(.45f);
+            for (float time = 0f; time < .4f; time += Time.unscaledDeltaTime)
+            {
+                scratches.canvasRenderer.SetAlpha(1f - time / .4f);
                 yield return null;
             }
             FinishBoardApparition();
@@ -539,6 +652,7 @@ namespace Solution
         protected override void OnDisable()
         {
             base.OnDisable();
+            if (hintCanvas) hintCanvas.gameObject.SetActive(false);
             FinishBoardApparition();
             if (numberCanvas) numberCanvas.gameObject.SetActive(false);
             if (!fading && zoomView == ZoomView.Room) return;
