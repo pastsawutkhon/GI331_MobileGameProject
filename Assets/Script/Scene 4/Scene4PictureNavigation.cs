@@ -107,6 +107,22 @@ namespace Solution
             RefreshControls();
         }
 
+        public void ReturnToOpenDoor(Sprite openDoor)
+        {
+            UpdateLeftView(openDoor);
+            background1.gameObject.SetActive(false);
+            backgroundImage.gameObject.SetActive(true);
+            backgroundImage.sprite = openDoor;
+            backgroundImage.gameObject.name = "Pic 4 - Left";
+            var fitter = backgroundImage.GetComponent<AspectRatioFitter>();
+            if (fitter && openDoor) fitter.aspectRatio = openDoor.rect.width / openDoor.rect.height;
+            CurrentView = -1;
+            IsExploring = true;
+            InteractionLocked = false;
+            ViewChanged?.Invoke(CurrentView);
+            RefreshControls();
+        }
+
         public void LookLeft()
         {
             if (IsExploring && !IsBusy && !InteractionLocked && CurrentView > -1 && GetViewSprite(CurrentView - 1) != null)

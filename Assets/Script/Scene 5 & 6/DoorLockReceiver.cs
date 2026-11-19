@@ -1,24 +1,56 @@
+using System.Collections;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace Solution
 {
-    public class DoorLockReceiver : MonoBehaviour, IItemReceiver
+    public class DoorLockReceiver : InventoryDropTarget, IPointerClickHandler
     {
         [SerializeField] private string requiredKeyName = "Key";
         [SerializeField] private GameObject operatingRoomGroup;
         [SerializeField] private GameObject evidenceRoomGroup;
+        [SerializeField] private Image background;
+        [SerializeField] private WorldInteractionHandler navigation;
+        private static bool unlocked;
 
-        public bool CanReceiveItem(string itemName)
+        internal static void ResetLock() => unlocked = false;
+
+        private void OnEnable() => SetOpening(unlocked ? 1f : 0f);
+        private void OnDisable() => StopAllCoroutines();
+
+        public override bool TryUse(InventoryUI inventoryUI, int slotIndex)
         {
-            return itemName == requiredKeyName;
+            if (unlocked || !navigation.CanUnlockDoor || !inventoryUI.HasItemInSlot(slotIndex) ||
+                inventoryUI.inventory.slots[slotIndex].itemName != requiredKeyName) return false;
+            if (!inventoryUI.inventory.UseItem(slotIndex)) return false;
+            unlocked = true;
+            StartCoroutine(Open());
+            return true;
         }
 
-        public void OnReceiveItem(string itemName)
+        private IEnumerator Open()
         {
-            Debug.Log("Door Unlocked!");
-            // สลับการแสดงผลไปยังห้องหลักฐาน
-            if (operatingRoomGroup != null) operatingRoomGroup.SetActive(false);
-            if (evidenceRoomGroup != null) evidenceRoomGroup.SetActive(true);
+            for (float time = 0; time < .4f; time += Time.unscaledDeltaTime)
+            {
+                SetOpening(Mathf.SmoothStep(0f, 1f, time / .4f));
+                yield return null;
+            }
+            SetOpening(1);
+        }
+
+        private void SetOpening(float amount)
+        {
+            if (background && background.material.HasProperty("_DoorOpen"))
+                background.material.SetFloat("_DoorOpen", amount);
+        }
+
+        public void OnPointerClick(PointerEventData tap)
+        {
+            if (!unlocked || !navigation.CanUnlockDoor || tap.button != PointerEventData.InputButton.Left) return;
+            background.gameObject.SetActive(false);
+            operatingRoomGroup.SetActive(false);
+            evidenceRoomGroup.SetActive(true);
         }
     }
 }

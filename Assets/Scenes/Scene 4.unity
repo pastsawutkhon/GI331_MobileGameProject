@@ -818,7 +818,6 @@ MonoBehaviour:
   documentFold: {fileID: 666703085}
   fingerprintSprite: {fileID: 21300000, guid: 34cfc3af91d5ee54f9f5ae876b34c69f, type: 3}
   fingerprintShader: {fileID: 4800000, guid: b017ae6fff2e48ab923cb2089d58d917, type: 3}
-  bloodHandprint: {fileID: 21300000, guid: ee73f0d1f1a49fd4ba993524b526767c, type: 3}
   boardGhostSprite: {fileID: 21300000, guid: 44b50ab761b1422f98064c8d40568482, type: 3}
   boardHandImpact: {fileID: 8300000, guid: c22b68957f7576d42a0e9fb5e2fd6688, type: 3}
   onCandlePuzzleSolved:

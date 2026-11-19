@@ -2,18 +2,17 @@ using UnityEngine;
 
 namespace Solution
 {
-    [RequireComponent(typeof(Collider2D))]
     public class OrganPiece : MonoBehaviour
     {
-        [SerializeField] private MannequinController mannequin;
+        // Centre and radii in the UV space of Zoom Room 1.
+        [SerializeField] private Vector4 outline;
+        public Vector4 Outline => outline;
+        public Vector2 Center => new Vector2(outline.x, outline.y);
 
-        public void RemovePiece()
+        public float HitDistance(Vector2 point)
         {
-            gameObject.SetActive(false);
-            if (mannequin != null)
-            {
-                mannequin.OnOrganRemoved();
-            }
+            Vector2 delta = point - Center;
+            return new Vector2(delta.x / outline.z, delta.y / outline.w).sqrMagnitude;
         }
     }
 }

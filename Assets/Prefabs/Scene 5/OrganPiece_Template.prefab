@@ -157,4 +157,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8c27c2fef30ecc4a996d6513561f37c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Solution.OrganPiece
-  mannequin: {fileID: 0}
+  outline: {x: 0.5, y: 0.4, z: 0.04, w: 0.05}
