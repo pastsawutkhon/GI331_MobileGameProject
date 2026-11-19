@@ -69,6 +69,8 @@ namespace Solution
         protected override bool OnPressed(Vector2 screenPosition)
         {
             if (!slotImage || !slotImage.canvas) return false;
+            var pointer = pressAction?.activeControl?.device as UnityEngine.InputSystem.Pointer;
+            if (pointer != null) screenPosition = pointer.position.ReadValue();
             if (isCameraActive)
             {
                 // Clues may cover the inventory in a close-up or the destination scene.

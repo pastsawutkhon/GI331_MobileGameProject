@@ -170,7 +170,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -341,18 +341,6 @@ PrefabInstance:
     - target: {fileID: 5383114575418092083, guid: 332864347bcb6ef4280c21c78ab774af, type: 3}
       propertyPath: m_SizeDelta.y
       value: 1000
-      objectReference: {fileID: 0}
-    - target: {fileID: 5383114575418092083, guid: 332864347bcb6ef4280c21c78ab774af, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5383114575418092083, guid: 332864347bcb6ef4280c21c78ab774af, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5383114575418092083, guid: 332864347bcb6ef4280c21c78ab774af, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5383114575418092083, guid: 332864347bcb6ef4280c21c78ab774af, type: 3}
       propertyPath: m_LocalPosition.x
@@ -596,7 +584,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &322634396
 Transform:
   m_ObjectHideFlags: 0
@@ -659,18 +647,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e48afe6a8126e1a418eaa7dd642cc522, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Solution.Scene6Controller
-  requiredItem: SD_Card
-  videoPanel: {fileID: 0}
-  teerapatActor: {fileID: 0}
-  teerawatActor: {fileID: 0}
-  sewerLadderEntrance: {fileID: 0}
-  sewerDeadEndArea: {fileID: 0}
-  screwdriverItem: {fileID: 0}
-  choicePanel: {fileID: 0}
-  btnFight: {fileID: 0}
-  btnSuicide: {fileID: 0}
-  blackScreenFade: {fileID: 0}
-  camTransform: {fileID: 0}
+  inventoryUI: {fileID: 109268748}
+  hud: {fileID: 1175140046}
+  thaiFont: {fileID: 12800000, guid: 64c4f764faf33ca44be34f9eed5d2236, type: 3}
+  evidenceRoom: {fileID: 21300000, guid: aee04630f8db51a4c94a7eed96e02780, type: 3}
+  stairwell: {fileID: 21300000, guid: f0646d682b7f4e23abee757d15d80bf3, type: 3}
+  cleanPaperShader: {fileID: 4800000, guid: 55a9959105d143d3ab68b6757a2a6734, type: 3}
+  metalDrop: {fileID: 8300000, guid: 86138a5a9545b7c45b12ca4a588b2b0a, type: 3}
+  tunnel: {fileID: 21300000, guid: 47a553f07b2d4b8dbbe1e274b067c190, type: 3}
+  reverseTunnel: {fileID: 21300000, guid: 81fe648a6caa41ae88d57f52dc066a8f, type: 3}
+  footsteps: {fileID: 8300000, guid: 4a2f831e154aacf478bc7ff62f88b68e, type: 3}
+  tapePeel: {fileID: 8300000, guid: 6449c57f95d04e0390a500d731abb172, type: 3}
+  cardInsert: {fileID: 8300000, guid: 8fe884d541ea4faa86ca8a09858c067c, type: 3}
+  nearStep: {fileID: 8300000, guid: 5e149fa8af6d4f1ba8a4ce534a11d8d5, type: 3}
+  tunnelBrother: {fileID: 21300000, guid: 1569466af8ba46cfbc21dcb764fcea0c, type: 3}
+  roomAmbience: {fileID: 8300000, guid: f8d05122e04e431089e4dfcfea7c5a3a, type: 3}
+  tunnelAmbience: {fileID: 8300000, guid: 9d7f2e5b9ca548ef802faf65db34b094, type: 3}
+  brother: {fileID: 21300000, guid: 799d56325c6c435bb800592aca48a7e6, type: 3}
+  sdIcon: {fileID: 21300000, guid: 1f1b6e73fc144c20948a6cc549e7c63a, type: 3}
+  grate: {fileID: 21300000, guid: e27a066071394bfdb3a288a5fc5a1adf, type: 3}
+  screwdriver: {fileID: 21300000, guid: 0fe8a159469347558c3a5d9a22ce7bcf, type: 3}
+  player: {fileID: 1547859749}
 --- !u!1 &462812889
 GameObject:
   m_ObjectHideFlags: 0
@@ -688,7 +685,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &462812890
 RectTransform:
   m_ObjectHideFlags: 0
@@ -966,7 +963,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &699297237
 Transform:
   m_ObjectHideFlags: 0
@@ -1125,7 +1122,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &836652173
 Transform:
   m_ObjectHideFlags: 0
@@ -1340,7 +1337,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1066168601
 Transform:
   m_ObjectHideFlags: 0
@@ -1369,6 +1366,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Solution.WorldInteractionHandler
   inputActions: {fileID: -944628639613478452, guid: 230d16a86e393a04191ba5705d092c79, type: 3}
+  background: {fileID: 0}
+  mannequinCloseUp: {fileID: 0}
+  mannequin: {fileID: 0}
+  stairsTouchArea: {fileID: 0}
+  mannequinTouchArea: {fileID: 0}
+  undo: {fileID: 0}
+  inventoryUI: {fileID: 0}
+  fadeOverlay: {fileID: 0}
+  fadeDuration: 0.2
+  door: {fileID: 0}
+  nightCamera: {fileID: 0}
+  fingerprint: {fileID: 0}
+  fingerprintShader: {fileID: 0}
 --- !u!1001 &1157644826
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1447,7 +1457,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1158182153
 Transform:
   m_ObjectHideFlags: 0
@@ -1751,9 +1761,9 @@ Canvas:
   m_GameObject: {fileID: 1175140045}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 0
-  m_Camera: {fileID: 0}
-  m_PlaneDistance: 100
+  m_RenderMode: 1
+  m_Camera: {fileID: 1973297173}
+  m_PlaneDistance: 1
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
   m_OverrideSorting: 0
@@ -2046,7 +2056,7 @@ VideoPlayer:
   m_EnabledAudioTracks: 01
   m_DirectAudioMutes: 00
   m_ControlledAudioTrackCount: 1
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_SkipOnDrop: 1
   m_Looping: 0
   m_WaitForFirstFrame: 1
@@ -2481,7 +2491,7 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0

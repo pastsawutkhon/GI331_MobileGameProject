@@ -8,14 +8,16 @@ namespace Solution
     public class DoorLockReceiver : InventoryDropTarget, IPointerClickHandler
     {
         [SerializeField] private string requiredKeyName = "Key";
-        [SerializeField] private GameObject operatingRoomGroup;
-        [SerializeField] private GameObject evidenceRoomGroup;
+        [SerializeField] private InventoryUI inventoryUI;
+        [SerializeField] private CameraSlot cameraSlot;
         [SerializeField] private Image background;
         [SerializeField] private WorldInteractionHandler navigation;
+        [SerializeField] private AudioClip openingSound;
         private static bool unlocked;
 
         internal static void ResetLock() => unlocked = false;
 
+        private void Start() => SetOpening(unlocked ? 1f : 0f);
         private void OnEnable() => SetOpening(unlocked ? 1f : 0f);
         private void OnDisable() => StopAllCoroutines();
 
@@ -25,6 +27,15 @@ namespace Solution
                 inventoryUI.inventory.slots[slotIndex].itemName != requiredKeyName) return false;
             if (!inventoryUI.inventory.UseItem(slotIndex)) return false;
             unlocked = true;
+            if (openingSound)
+            {
+                // Let the creak finish even if the player immediately enters the next room.
+                var sound = new GameObject("Opening door to Scene 6").AddComponent<AudioSource>();
+                DontDestroyOnLoad(sound.gameObject);
+                sound.clip = openingSound;
+                sound.Play();
+                Destroy(sound.gameObject, openingSound.length);
+            }
             StartCoroutine(Open());
             return true;
         }
@@ -48,9 +59,7 @@ namespace Solution
         public void OnPointerClick(PointerEventData tap)
         {
             if (!unlocked || !navigation.CanUnlockDoor || tap.button != PointerEventData.InputButton.Left) return;
-            background.gameObject.SetActive(false);
-            operatingRoomGroup.SetActive(false);
-            evidenceRoomGroup.SetActive(true);
+            SceneEntranceFade.Begin("Scene 6", inventoryUI.inventory, cameraSlot.IsCameraActive);
         }
     }
 }
