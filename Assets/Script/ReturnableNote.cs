@@ -14,6 +14,31 @@ namespace Solution
         public GameObject NightVisionMark => nightVisionMark;
         private InventoryUI inventoryView;
         private bool collected;
+        private DeskBoxInspection hidingPlace;
+        private Image containerView;
+        internal int ContainerPosition { get; private set; }
+
+        private void Start()
+        {
+            var points = System.Array.FindAll(FindObjectsByType<DeskBoxInspection>(FindObjectsSortMode.None),
+                point => point.gameObject.scene == gameObject.scene);
+            if (points.Length == 0) return;
+            int selection = Random.Range(0, points.Length * DeskBoxInspection.NotePositionCount);
+            hidingPlace = points[selection / DeskBoxInspection.NotePositionCount];
+            ContainerPosition = selection % DeskBoxInspection.NotePositionCount;
+            paper.color = Color.clear;
+            paper.raycastTarget = false;
+            if (paperShadow != null) paperShadow.enabled = false;
+        }
+
+        internal bool IsHiddenIn(DeskBoxInspection box) => hidingPlace == box && !collected;
+        internal void SetContainerView(Image view) => containerView = view;
+
+        internal void CollectFromContainer(DeskBoxInspection box)
+        {
+            if (!IsHiddenIn(box) || !TryCollect()) return;
+            if (containerView != null) containerView.gameObject.SetActive(false);
+        }
 
         public Image CurrentPaperView()
         {
@@ -22,7 +47,7 @@ namespace Solution
                 var page = viewer.transform.Find("Inspection Backdrop/Paper");
                 if (page != null) return page.GetComponent<Image>();
             }
-            if (!collected) return paper;
+            if (!collected) return hidingPlace != null ? containerView : paper;
             if (inventoryView == null) inventoryView = FindFirstObjectByType<InventoryUI>();
             if (inventoryView == null || inventoryView.inventory == null) return null;
             for (int i = 0; i < inventoryView.inventory.slots.Count && i < inventoryView.slotImages.Length; i++)
@@ -33,7 +58,7 @@ namespace Solution
         private Color originalColor;
         private Shadow paperShadow;
         private static GameObject viewer;
-        public static bool IsInspecting => viewer != null || MorseKeypadLock.IsOpen || BinderInspection.IsOpen;
+        public static bool IsInspecting => viewer != null || MorseKeypadLock.IsOpen || BinderInspection.IsOpen || DeskBoxInspection.IsOpen;
 
         private void Awake()
         {
@@ -45,20 +70,37 @@ namespace Solution
         public void OnPointerClick(PointerEventData eventData)
         {
             if (collected || IsInspecting || eventData.button != PointerEventData.InputButton.Left) return;
-            var ui = FindFirstObjectByType<InventoryUI>();
-            if (ui == null || ui.inventory == null || !ui.inventory.AddItem(ItemName, paper.sprite)) return;
+            TryCollect();
+        }
+
+        private bool TryCollect()
+        {
+            if (inventoryView == null) inventoryView = FindFirstObjectByType<InventoryUI>();
+            if (inventoryView == null || inventoryView.inventory == null ||
+                !inventoryView.inventory.AddItem(ItemName, paper.sprite)) return false;
             SetCollected(true);
+            return true;
         }
 
         private void SetCollected(bool value)
         {
             collected = value;
             if (nightVisionMark != null) nightVisionMark.SetActive(true);
-            paper.color = value ? Color.clear : originalColor;
-            if (paperShadow != null) paperShadow.enabled = !value;
+            paper.color = value || hidingPlace != null ? Color.clear : originalColor;
+            if (paperShadow != null) paperShadow.enabled = !value && hidingPlace == null;
         }
 
         public override bool TryUse(InventoryUI ui, int index)
+        {
+            return hidingPlace == null && TryReturn(ui, index);
+        }
+
+        internal bool ReturnToContainer(DeskBoxInspection box, InventoryUI ui, int index)
+        {
+            return hidingPlace == box && TryReturn(ui, index);
+        }
+
+        private bool TryReturn(InventoryUI ui, int index)
         {
             if (!collected || IsInspecting || !ui.HasItemInSlot(index)
                 || ui.inventory.slots[index].itemName != ItemName) return false;
