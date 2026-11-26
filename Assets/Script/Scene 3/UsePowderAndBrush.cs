@@ -25,6 +25,19 @@ namespace Solution
         private enum Step { Powder, Brush, Completed }
         private Step currentStep = Step.Powder;
 
+        private CameraSlot nightCamera;
+        private bool sawMirror;
+        private void LateUpdate()
+        {
+            if (sawMirror || currentStep != Step.Powder || !mirrorRoom || !mirrorRoom.activeInHierarchy) return;
+            if (!nightCamera) nightCamera = FindAnyObjectByType<CameraSlot>();
+            if (!nightCamera || nightCamera.NightVisionOpacity < .8f) return;
+            sawMirror = true;
+            ChapterDialogue.Show("S03_PAT_01");
+        }
+
+        [SerializeField] private GameObject mirrorRoom;
+
         protected override bool TryGetDragTarget(Vector2 screenPosition, out Image image)
         {
             image = null;
@@ -70,11 +83,13 @@ namespace Solution
                         {
                             if (step1UIToShow != null) step1UIToShow.SetActive(true);
                             currentStep = Step.Brush;
+                            ChapterDialogue.Show("S03_PAT_02");
                         }
                         else if (currentStep == Step.Brush)
                         {
                             if (step2UIToShow != null) step2UIToShow.SetActive(true);
                             currentStep = Step.Completed;
+                            ChapterDialogue.Show("S03_PAT_03", "S03_PAT_04");
 
                             audioWhisper.Play();
                         }

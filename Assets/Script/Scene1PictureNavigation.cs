@@ -86,6 +86,7 @@ namespace Solution
             fadeOverlay.blocksRaycasts = false;
             IsBusy = false;
             RefreshControls();
+            if (view == 0) ChapterDialogue.Show("S01_PAT_03");
         }
 
         private IEnumerator Fade(float from, float to)

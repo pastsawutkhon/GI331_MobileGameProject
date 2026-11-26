@@ -1394,6 +1394,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5140b11c84f18b1418d05e42cf481609, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Solution.UsePowderAndBrush
+  mirrorRoom: {fileID: 517164315}
   inputActions: {fileID: -944628639613478452, guid: 230d16a86e393a04191ba5705d092c79, type: 3}
   inventoryUI: {fileID: 1202579772}
   step1ItemName: Powder

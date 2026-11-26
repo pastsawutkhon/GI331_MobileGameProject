@@ -484,6 +484,7 @@ namespace Solution
             fadeOverlay.blocksRaycasts = false;
             fading = false;
             if (nextView == ZoomView.Room) sceneNavigation.SetInteractionLocked(false);
+            if (nextView == ZoomView.Candles) ChapterDialogue.Show("S04_PAT_05");
         }
 
         private void UpdateTouchHints()
@@ -693,6 +694,7 @@ namespace Solution
 
             Debug.Log("·µ–‡ª‘¥Ω“∑“ß≈ß„µÈ¥‘π·≈È«!");
             OnHatchOpened?.Invoke();
+            ChapterDialogue.Show("S04_PAT_06", "S04_PAT_07");
         }
     }
 }

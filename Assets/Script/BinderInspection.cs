@@ -123,6 +123,7 @@ namespace Solution
                 yield return null;
             }
             Layout(); UpdateCounter();
+            if (CurrentPage == 2) ChapterDialogue.Show("S02_PAT_03", "S02_PAT_04", "S02_PAT_05");
             turning=false;turn=null;
             previous.interactable=next.interactable=exit.interactable=true;
         }

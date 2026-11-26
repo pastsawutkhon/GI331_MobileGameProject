@@ -208,6 +208,8 @@ public class TypewriterText : MonoBehaviour
         // พิมพ์ครบแล้ว หยุดเสียงเขียน ก่อนจะเริ่มเสียงขีด
         StopTypeSound();
 
+        if (text.text.Contains("CLH-PT-0724"))
+            Solution.ChapterDialogue.Show("S04_PAT_01", "S04_PAT_02");
         OnFinished?.Invoke();
 
         if (HasStrikeTargets() && isActiveAndEnabled)

@@ -117,6 +117,7 @@ public class lightEvent : Document
         {
             doorAudioSource.Play();
         }
+        yield return ChapterDialogue.Sequence("S04_PAT_03", "S04_PAT_04");
 
         if (scene4Navigation != null)
         {

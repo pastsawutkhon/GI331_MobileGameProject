@@ -89,6 +89,7 @@ namespace Solution
             shade.color = new Color(.025f,.025f,.025f,.82f);
             line = TextAt(shade.rectTransform,.04f,.05f,.96f,.95f);
             Say("");
+            ChapterDialogue.Show("S05_PAT_02", "S05_PAT_03", "S05_PAT_04");
         }
 
         private static void Position(RectTransform rect, Transform parent,float x,float y,float right,float top)
@@ -165,6 +166,7 @@ namespace Solution
             card.gameObject.SetActive(false);
             cleanPaper.SetFloat("_CardRemoved", 1f);
             ShowCameraGuide();
+            ChapterDialogue.Show("S05_PAT_05");
             Say("ลาก SD card ไปที่กล้องในกรอบสีทอง");
         }
 
@@ -248,8 +250,8 @@ namespace Solution
                 Say("ในคลิป กล้องไล่ผ่านใบหน้าบนบอร์ด ก่อนหยุดที่อุโมงค์มืด");
                 yield return new WaitForSecondsRealtime(2.5f);
             }
-            Say("ธีรภัทรตะโกนลั่นห้อง\n“ใครทำเรื่องพวกนี้!”");
-            yield return new WaitForSecondsRealtime(2.4f);
+            Say("");
+            yield return ChapterDialogue.Sequence("S06_PAT_01", "S06_PAT_02", "S06_PAT_03");
             speaker.PlayOneShot(footsteps);
             Say("เสียงฝีเท้าหนัก ๆ ดังลงมาตามบันได");
             yield return new WaitForSecondsRealtime(1.7f);
@@ -260,9 +262,8 @@ namespace Solution
             RevealStairs();
             yield return new WaitForSecondsRealtime(.34f);
             yield return FadeLight(.25f, .14f);
-            Say("“พี่ธีรวัฒน์… พี่มาทำอะไรที่นี่?”");
             yield return Shake(.85f);
-            yield return new WaitForSecondsRealtime(1.8f);
+            yield return ChapterDialogue.Sequence("S06_WAT_01", "S06_PAT_04", "S06_PAT_05");
             picture.transform.SetAsFirstSibling();
             inventoryUI.gameObject.SetActive(true);
             exit.gameObject.SetActive(true);
@@ -347,8 +348,8 @@ namespace Solution
             ambience.Play();
             Say("ธีรภัทรวิ่งฝ่าน้ำขัง เสียงฝีเท้ายังไล่ตามมา");
             yield return Shake(1.5f);
-            Say("ทางตัน…");
-            yield return new WaitForSecondsRealtime(1.2f);
+            Say("");
+            yield return ChapterDialogue.Sequence("S06_PAT_06");
             Say("");
             yield return FadeLight(1, .19f);
             picture.sprite = reverseTunnel;
@@ -377,8 +378,7 @@ namespace Solution
             speaker.PlayOneShot(nearStep);
             yield return FadeLight(.12f, .1f);
             yield return new WaitForSecondsRealtime(.65f);
-            Say("ธีรภัทรกำไขควงไว้แน่น\n“ทำแบบนี้ทำไม แกมันไม่ใช่คนแล้ว”");
-            yield return new WaitForSecondsRealtime(2.6f);
+            yield return ChapterDialogue.Sequence("S06_WAT_02", "S06_WAT_03", "S06_PAT_07", "S06_PAT_08");
             stage = Stage.Choice;
             choices=ImageAt("Final choice",picture.transform,null,.08f,.26f,.92f,.45f);
             choices.color=new Color(.04f,.035f,.03f,.9f);
@@ -400,6 +400,12 @@ namespace Solution
             stage=Stage.Ending;
             inventoryUI.gameObject.SetActive(false);
             choices.gameObject.SetActive(false);
+            StartCoroutine(PlayEnding(fight));
+        }
+
+        private IEnumerator PlayEnding(bool fight)
+        {
+            yield return ChapterDialogue.Sequence(fight ? "END_A_PAT_01" : "END_B_PAT_01");
             Say("");
             var black=ImageAt("Cut to black",hud,null,0,0,1,1);
             black.color=Color.black;

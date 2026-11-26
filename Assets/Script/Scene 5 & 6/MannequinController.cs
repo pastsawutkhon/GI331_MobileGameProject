@@ -95,7 +95,11 @@ namespace Solution
         {
             effect.SetFloat("_NightVision", cameraSlot.NightVisionOpacity);
             float visible = closeUp && !awarded && cameraSlot.IsCameraActive ? cameraSlot.NightVisionOpacity : 0;
-            if (visible >= .5f) discovered = true;
+            if (visible >= .5f && !discovered)
+            {
+                discovered = true;
+                ChapterDialogue.Show("S05_PAT_01");
+            }
             if (Mathf.Approximately(visible, lastVisibility)) return;
             lastVisibility = visible;
             effect.SetFloat("_KeyVisibility", visible);

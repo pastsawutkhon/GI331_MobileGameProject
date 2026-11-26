@@ -28,6 +28,12 @@ namespace Solution
             keypadAudio.volume = 1f;
         }
 
+        private IEnumerator Start()
+        {
+            while (SceneEntranceFade.InProgress) yield return null;
+            ChapterDialogue.Show("S02_PAT_01");
+        }
+
         private void PlaySound(AudioClip clip, float volume)
         {
             if (clip != null && keypadAudio != null) keypadAudio.PlayOneShot(clip, volume);
@@ -52,6 +58,7 @@ namespace Solution
             if (IsUnlocked || IsOpen || ReturnableNote.IsInspecting || lockSprite == null) return;
             if (MorseDeskLamp.CurrentCode == null) MorseDeskLamp.BeginNewGame();
             IsOpen = true;
+            ChapterDialogue.Show("S02_PAT_02");
             entered = "";
             viewer = new GameObject("Lock Inspection", typeof(RectTransform), typeof(Canvas),
                 typeof(CanvasScaler), typeof(GraphicRaycaster));

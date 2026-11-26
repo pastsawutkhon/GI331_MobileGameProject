@@ -247,7 +247,7 @@ namespace Solution
 
         private void HandlePress(InputAction.CallbackContext context)
         {
-            if (isDragging || positionAction == null)
+            if (ChapterDialogue.Reading || isDragging || positionAction == null)
                 return;
 
             Vector2 screenPosition = positionAction.ReadValue<Vector2>();
